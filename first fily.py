@@ -13,7 +13,7 @@ def get_dimension(name='config'):
     return value,svalue
 
 tuplea=get_dimension()
-auto=gameengine.Game(iheight=int(tuplea[0]),iwidth=int(tuplea[1]),bgcolor="black")
+auto=gameengine.Game(iheight=int(tuplea[0]),iwidth=int(tuplea[1]),bgcolor="yellow")
 
 auto.init()
 
