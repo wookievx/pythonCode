@@ -79,25 +79,25 @@ class Game:
             self.loadImage()
             self.run()
             self.RUN=True
-            self.objects.append(BasicActor(20,self.width/2,self.height/2,1,1))
+            self.objects.append(BasicActor(20,self.width/2,self.height/2,1,0.5))
+            self.objects.append(BasicActor(40,self.width/3,self.height/3,0.5,0.5))
 
     def paint(self):
         self.canvas.delete(ALL)
         for actor in self.objects:
             self.canvas.create_oval(actor.minx(),actor.miny(),actor.maxx(),actor.maxy(),fill="red")
-        self.canvas.create_image(self.width/2,self.height/2,anchor=CENTER,image=self.image[0])
-        self.canvas.create_image(self.width/3*2,self.height/2,anchor=CENTER,image=self.image[1])
         self.canvas.create_line(0,0,self.x,self.width/2,fill="red",dash=(4,4))
 
     def run(self):
+        self.root.after(10,self.run)
         for actor in self.objects:
-            self.moveEngine.check_collision_with_bounds()
+            self.moveEngine.check_collision_with_bounds(actor)
         self.moveActors()
         if self.x <self.width:
             self.x+=1
         else:
             self.x=0
-        self.root.after(10,self.run)
+
         self.paint()
 
     def moveActors(self):

@@ -57,23 +57,19 @@ class mapMovement:
     def check_collision_with_bounds(self,object=rigidObj()) -> bool:
         flag =False
         if object.minx()<self.minx:
-            object.velocityx=-object.velocityx
-            object.invx(object.minx()-self.minx)
+            object.invx(object.minx()-self.minx-5)
             flag=True
 
         if object.maxx()>self.maxx:
-            object.velocityx=-object.velocityx
-            object.invx(object.maxx()-self.maxx)
+            object.invx(object.maxx()-self.maxx+5)
             flag=True
 
         if object.miny()<self.miny:
-            object.velocityy=-object.velocityy
-            object.invy(object.miny()-self.miny)
+            object.invy(object.miny()-self.miny-5)
             flag=True
 
         if object.maxy()>self.maxy:
-            object.velocityy=-object.velocityy
-            object.invy(object.maxy()-self.maxy)
+            object.invy(object.maxy()-self.maxy+5)
             flag=True
 
         return flag
