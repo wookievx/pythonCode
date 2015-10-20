@@ -2,7 +2,7 @@ __author__ = 'lukaszlampart'
 
 """ Object for simple collision detection with walls
 """
-class rigid_obj:
+class rigidObj:
     def __init__(self):
         self.x=0
         self.y=0
@@ -54,7 +54,7 @@ class mapMovement:
     """
     Method checking collision with bounds and signaling it to the colliding object
     """
-    def check_collision_with_bounds(self,object=rigid_obj()) -> bool:
+    def check_collision_with_bounds(self,object=rigidObj()) -> bool:
         flag =False
         if object.minx()<self.minx:
             object.velocityx=-object.velocityx
