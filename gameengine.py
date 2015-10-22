@@ -2,6 +2,7 @@ __author__ = 'lukaszlampart'
 
 from tkinter import *
 import movementengine
+import math3d as m3d
 
 class BasicActor(movementengine.rigidObj):
     def __init__(self,radius=5,startx=0,starty=0,startvx=0,startvy=0):
@@ -24,6 +25,29 @@ class BasicActor(movementengine.rigidObj):
     def maxy(self):
         return self.y+self.radius
 
+class PlayerChar(BasicActor):
+    def __init__(self,radius=5,startx=0,starty=0,startvx=0,startvy=0):
+        BasicActor.__init__(self,radius,startx,starty,startvx,startvy)
+        self.leftRot=m3d.Orientation.new_rot_z(3.14/4)
+        self.rightRot=m3d.Orientation.new_rot_z(6.28 - 3.14/4)
+
+    @property
+    def speedVal(self):
+        return m3d.Vector(self.velocityx,self.velocityy,0).length
+
+    @property
+    def rightArmLine(self):
+        return self.leftRot * m3d.Vector(self.velocityx/self.speedVal*self.radius*2,self.velocityy/self.speedVal*self.radius*2,0)
+
+    @property
+    def leftArmLine(self):
+        return self.rightRot * m3d.Vector(self.velocityx/self.speedVal*self.radius*2,self.velocityy/self.speedVal*self.radius*2,0)
+
+    def rot(self,angle=0):
+        rot=m3d.Orientation.new_rot_z(angle)
+        v=rot * m3d.Vector(self.velocityx,self.velocityy,0)
+        self.velocityx=v[0]
+        self.velocityy=v[1]
 
 class Game:
     def __init__(self, iheight=300, iwidth=300, bgcolor="black"):
@@ -66,6 +90,8 @@ class Game:
         self.button=Button(self.frame,bg="black",fg="white",text="Click to lock and load",command=self.init)
         self.button.pack()
 
+        self.player=PlayerChar(30,200,200,2,1)
+
         self.root.mainloop()
 
     def loadImage(self):
@@ -81,9 +107,13 @@ class Game:
             self.RUN=True
             self.objects.append(BasicActor(20,self.width/2,self.height/2,1,0.5))
             self.objects.append(BasicActor(40,self.width/3,self.height/3,0.5,0.5))
+            self.objects.append(self.player)
 
     def paint(self):
         self.canvas.delete(ALL)
+        self.canvas.create_image(self.width/2,100,image=self.image[0])
+        self.canvas.create_line(self.player.x,self.player.y,self.player.x+self.player.rightArmLine[0],self.player.y+self.player.rightArmLine[1],fill="blue",width=5)
+        self.canvas.create_line(self.player.x,self.player.y,self.player.x+self.player.leftArmLine[0],self.player.y+self.player.leftArmLine[1],fill="blue",width=5)
         for actor in self.objects:
             self.canvas.create_oval(actor.minx(),actor.miny(),actor.maxx(),actor.maxy(),fill="red")
         self.canvas.create_line(0,0,self.x,self.width/2,fill="red",dash=(4,4))
@@ -93,6 +123,7 @@ class Game:
         for actor in self.objects:
             self.moveEngine.check_collision_with_bounds(actor)
         self.moveActors()
+        self.player.rot(-0.01)
         if self.x <self.width:
             self.x+=1
         else:

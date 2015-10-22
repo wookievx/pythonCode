@@ -1,7 +1,9 @@
 __author__ = 'lukaszlampart'
 
-""" Object for simple collision detection with walls
-"""
+""" Object for simple collision detection with walls """
+
+
+
 class rigidObj:
     def __init__(self):
         self.x=0
@@ -57,19 +59,19 @@ class mapMovement:
     def check_collision_with_bounds(self,object=rigidObj()) -> bool:
         flag =False
         if object.minx()<self.minx:
-            object.invx(object.minx()-self.minx-5)
+            object.invx(object.minx()-self.minx)
             flag=True
 
         if object.maxx()>self.maxx:
-            object.invx(object.maxx()-self.maxx+5)
+            object.invx(object.maxx()-self.maxx)
             flag=True
 
         if object.miny()<self.miny:
-            object.invy(object.miny()-self.miny-5)
+            object.invy(object.miny()-self.miny)
             flag=True
 
         if object.maxy()>self.maxy:
-            object.invy(object.maxy()-self.maxy+5)
+            object.invy(object.maxy()-self.maxy)
             flag=True
 
         return flag
