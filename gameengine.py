@@ -3,6 +3,7 @@ __author__ = 'lukaszlampart'
 from tkinter import *
 import movementengine
 import math3d as m3d
+from random import *
 
 class BasicActor(movementengine.rigidObj):
     def __init__(self,radius=5,startx=0,starty=0,startvx=0,startvy=0):
@@ -12,6 +13,7 @@ class BasicActor(movementengine.rigidObj):
         self.y=starty
         self.velocityx=startvx
         self.velocityy=startvy
+        self.speed=m3d.Vector(startvx,startvy,0).length
 
     def minx(self):
         return self.x-self.radius
@@ -24,6 +26,12 @@ class BasicActor(movementengine.rigidObj):
 
     def maxy(self):
         return self.y+self.radius
+
+    def makeFollow(self,followx,followy):
+        newVel=m3d.Vector(followx-self.x,followy-self.y,0).normalized
+        self.velocityx=newVel[0]*self.speed
+        self.velocityy=newVel[1]*self.speed
+
 
 class PlayerChar(BasicActor):
     def __init__(self,radius=5,startx=0,starty=0,startvx=0,startvy=0):
@@ -110,11 +118,12 @@ class Game:
         """ list of moving objects in game physics interaction are performed for each of them
         """
         self.objects=[]
+        self.enemies=[]
 
         self.button=Button(self.frame,bg="black",fg="white",text="Click to lock and load",command=self.init)
         self.button.pack()
 
-        self.player=PlayerChar(30,200,200,2,1)
+
         self.points=int(0)
         self.root.mainloop()
 
@@ -129,15 +138,24 @@ class Game:
     def init(self):
         if self.RUN is False:
             """set of food drawn by the game"""
+            self.timer=int(0)
+            self.points=int(0)
+            self.player=PlayerChar(30,50,self.height-50,2,1)
             self.food=(0,0,0) # last placed piece of food
             self.loadImage()
             self.canvas.bind("<ButtonPress-1>", self.onMouseC)
             self.vlabel['text']="velocity: " + str(self.player.speedVal)
             self.label['text']="Points: " + str(self.points)
             self.RUN=True
-            self.objects.append(BasicActor(20,self.width/2,self.height/2,1,0.5))
-            self.objects.append(BasicActor(40,self.width/3,self.height/3,0.5,0.5))
+            val=int(self.width+self.height)/200
+            val=int(max(4,val))
+            for v in range(0,val-2):
+                self.objects.append(BasicActor(uniform(5,40),20+self.width/val*v,20+self.height/val*v,uniform(-3,3),uniform(-3,3)))
+
+            for actor in self.objects:
+                self.enemies.append(actor)
             self.objects.append(self.player)
+            self.timer=int(0)
             self.run()
 
     def paint(self):
@@ -145,10 +163,12 @@ class Game:
         self.canvas.create_image(self.width/2,100,image=self.image[0])
         self.canvas.create_line(self.player.x,self.player.y,self.player.x+self.player.rightArmLine[0],self.player.y+self.player.rightArmLine[1],fill="blue",width=5)
         self.canvas.create_line(self.player.x,self.player.y,self.player.x+self.player.leftArmLine[0],self.player.y+self.player.leftArmLine[1],fill="blue",width=5)
+        player=self.canvas.create_oval(self.player.minx(),self.player.miny(),self.player.maxx(),self.player.maxy(),fill="blue")
         if self.food != (0,0,0):
             self.canvas.create_oval(self.food[0]-self.food[2],self.food[1]-self.food[2],self.food[0]+self.food[2],self.food[1]+self.food[2],fill="orange")
-        for actor in self.objects:
+        for actor in self.enemies:
             self.canvas.create_oval(actor.minx(),actor.miny(),actor.maxx(),actor.maxy(),fill="red")
+        return self.detectEnd(player)
 
 
     def eraseFood(self):
@@ -159,22 +179,40 @@ class Game:
     def end(self):
         self.RUN=False
         self.canvas.unbind("<ButtonPress-1>")
+        self.image.clear()
+        self.objects.clear()
+        self.enemies.clear()
+        self.canvas.delete(ALL)
 
     def run(self):
         if self.RUN is True:
             self.root.after(10,self.run)
+            self.timer+=1
+            if self.timer==1000000:
+                self.end()
+                return
+            if self.timer%100==1:
+                for enemy in self.enemies:
+                    enemy.makeFollow(self.player.x,self.player.y)
             self.eraseFood()
             for actor in self.objects:
                 self.moveEngine.check_collision_with_bounds(actor)
             self.moveActors()
-            self.vlabel['text']='velocity: ' + str(self.player.speedVal)
+            self.vlabel['text']='time: ' + str(10*self.timer)+ ' ms'
             self.label['text']='points: ' + str(self.points)
-            self.paint()
+            if self.paint() is True:
+                self.end()
 
     def moveActors(self):
         for actor in self.objects:
             actor.x+=actor.velocityx
             actor.y+=actor.velocityy
+
+    def detectEnd(self,player)  -> bool:
+        for enemy in self.enemies:
+            if player in self.canvas.find_overlapping(enemy.minx(),enemy.miny(),enemy.maxx(),enemy.maxy()):
+                return True
+        return False
 
 
 
