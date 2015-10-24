@@ -49,6 +49,27 @@ class PlayerChar(BasicActor):
         self.velocityx=v[0]
         self.velocityy=v[1]
 
+    def setVelocity(self,x,y):
+        if self.x==x or self.y==y:
+            self.velocityx=0
+            self.velocityy=0
+            return
+
+        vector1=m3d.Vector(x-self.x,y-self.y,0)
+        if vector1.length<self.radius:
+            vec=vector1.normalized
+            self.velocityx=vec[0]*10
+            self.velocityy=vec[1]*10
+        else:
+            vec=vector1.normalized
+            self.velocityx=(10-min(10,vector1.length/30))*vec[0]
+            self.velocityy=(10-min(10,vector1.length/30))*vec[1]
+
+        if self.velocityx==0 and self.velocityy==0:
+            self.velocityx=vec[0]/10
+            self.velocityy=vec[1]/10
+
+
 class Game:
     def __init__(self, iheight=300, iwidth=300, bgcolor="black"):
         """part of engine behind graphics
@@ -98,16 +119,18 @@ class Game:
         self.image.append(PhotoImage(file="graphics/game_graph.gif"))
         self.image.append(PhotoImage(file="graphics/j3R4B.gif"))
 
-
+    def onMouseC(self,event):
+        self.player.setVelocity(event.x,event.y)
 
     def init(self):
         if self.RUN is False:
             self.loadImage()
-            self.run()
+            self.canvas.bind("<ButtonPress-1>", self.onMouseC)
             self.RUN=True
             self.objects.append(BasicActor(20,self.width/2,self.height/2,1,0.5))
             self.objects.append(BasicActor(40,self.width/3,self.height/3,0.5,0.5))
             self.objects.append(self.player)
+            self.run()
 
     def paint(self):
         self.canvas.delete(ALL)
@@ -118,12 +141,16 @@ class Game:
             self.canvas.create_oval(actor.minx(),actor.miny(),actor.maxx(),actor.maxy(),fill="red")
         self.canvas.create_line(0,0,self.x,self.width/2,fill="red",dash=(4,4))
 
+
+    def end(self):
+        self.RUN=False
+        self.canvas.unbind("<ButtonPress-1>")
+
     def run(self):
         self.root.after(10,self.run)
         for actor in self.objects:
             self.moveEngine.check_collision_with_bounds(actor)
         self.moveActors()
-        self.player.rot(-0.01)
         if self.x <self.width:
             self.x+=1
         else:
