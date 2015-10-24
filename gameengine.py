@@ -86,6 +86,9 @@ class Game:
         """
         self.label=Label(self.root,text="Game")
         self.label.pack()
+
+        self.vlabel=Label(self.root,text="Velocity:")
+        self.vlabel.pack()
         """paramters of the window of the game loaded from the config file
         """
         self.height=iheight
@@ -112,7 +115,7 @@ class Game:
         self.button.pack()
 
         self.player=PlayerChar(30,200,200,2,1)
-
+        self.points=int(0)
         self.root.mainloop()
 
     def loadImage(self):
@@ -121,11 +124,16 @@ class Game:
 
     def onMouseC(self,event):
         self.player.setVelocity(event.x,event.y)
+        self.food=(event.x,event.y,10)
 
     def init(self):
         if self.RUN is False:
+            """set of food drawn by the game"""
+            self.food=(0,0,0) # last placed piece of food
             self.loadImage()
             self.canvas.bind("<ButtonPress-1>", self.onMouseC)
+            self.vlabel['text']="velocity: " + str(self.player.speedVal)
+            self.label['text']="Points: " + str(self.points)
             self.RUN=True
             self.objects.append(BasicActor(20,self.width/2,self.height/2,1,0.5))
             self.objects.append(BasicActor(40,self.width/3,self.height/3,0.5,0.5))
@@ -137,26 +145,31 @@ class Game:
         self.canvas.create_image(self.width/2,100,image=self.image[0])
         self.canvas.create_line(self.player.x,self.player.y,self.player.x+self.player.rightArmLine[0],self.player.y+self.player.rightArmLine[1],fill="blue",width=5)
         self.canvas.create_line(self.player.x,self.player.y,self.player.x+self.player.leftArmLine[0],self.player.y+self.player.leftArmLine[1],fill="blue",width=5)
+        if self.food != (0,0,0):
+            self.canvas.create_oval(self.food[0]-self.food[2],self.food[1]-self.food[2],self.food[0]+self.food[2],self.food[1]+self.food[2],fill="orange")
         for actor in self.objects:
             self.canvas.create_oval(actor.minx(),actor.miny(),actor.maxx(),actor.maxy(),fill="red")
-        self.canvas.create_line(0,0,self.x,self.width/2,fill="red",dash=(4,4))
 
+
+    def eraseFood(self):
+        if self.food!=(0,0,0) and m3d.Vector(self.player.x-self.food[0],self.player.y-self.food[1]).length<self.player.radius+self.food[2]:
+            self.food=(0,0,0)
+            self.points+=1
 
     def end(self):
         self.RUN=False
         self.canvas.unbind("<ButtonPress-1>")
 
     def run(self):
-        self.root.after(10,self.run)
-        for actor in self.objects:
-            self.moveEngine.check_collision_with_bounds(actor)
-        self.moveActors()
-        if self.x <self.width:
-            self.x+=1
-        else:
-            self.x=0
-
-        self.paint()
+        if self.RUN is True:
+            self.root.after(10,self.run)
+            self.eraseFood()
+            for actor in self.objects:
+                self.moveEngine.check_collision_with_bounds(actor)
+            self.moveActors()
+            self.vlabel['text']='velocity: ' + str(self.player.speedVal)
+            self.label['text']='points: ' + str(self.points)
+            self.paint()
 
     def moveActors(self):
         for actor in self.objects:
