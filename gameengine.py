@@ -119,9 +119,14 @@ class Game:
         """
         self.objects=[]
         self.enemies=[]
-
-        self.button=Button(self.frame,bg="black",fg="white",text="Click to lock and load",command=self.init)
-        self.button.pack()
+        """ buttons starting games with 3 dificulty levels"""
+        self.button=[]
+        button=Button(self.frame,bg="black",fg="white",text="Start easy",command=self.easyInit)
+        self.button.append(button)
+        button.pack()
+        button=Button(self.frame,bg="black",fg="white",text="Start hard",command=self.hardInit)
+        self.button.append(button)
+        button.pack()
 
 
         self.points=int(0)
@@ -135,9 +140,10 @@ class Game:
         self.player.setVelocity(event.x,event.y)
         self.food=(event.x,event.y,10)
 
-    def init(self):
+    def easyInit(self):
         if self.RUN is False:
             """set of food drawn by the game"""
+            self.followThreshold=int(100)
             self.timer=int(0)
             self.points=int(0)
             self.player=PlayerChar(30,50,self.height-50,2,1)
@@ -150,13 +156,35 @@ class Game:
             val=int(self.width+self.height)/200
             val=int(max(4,val))
             for v in range(0,val-2):
-                self.objects.append(BasicActor(uniform(5,40),20+self.width/val*v,20+self.height/val*v,uniform(-3,3),uniform(-3,3)))
+                self.objects.append(BasicActor(uniform(5,40),20+self.width/val*v,20+self.height/100,uniform(-3,3),uniform(-3,3)))
 
             for actor in self.objects:
                 self.enemies.append(actor)
             self.objects.append(self.player)
-            self.timer=int(0)
             self.run()
+
+    def hardInit(self):
+        if self.RUN is False:
+            #initialization of hard mode
+            self.followThreshold=int(50)
+            self.timer=int(0)
+            self.points=int(0)
+            self.player=PlayerChar(30,50,self.height-50,2,1)
+            self.food=(0,0,0)
+            self.loadImage()
+            self.canvas.bind("<ButtonPress-1>",self.onMouseC)
+            self.vlabel['text']="time: "+str(self.timer*10)+" ms"
+            self.label['text']="points: "+str(self.points)
+            self.RUN=True
+            val=int(self.width+self.height)/150
+            val=int(max(4,val))
+            for v in range(0,val-2):
+                self.objects.append(BasicActor(uniform(5,40),20+self.width/val*v,20+self.height/100,uniform(-4,4),uniform(-4,4)))
+            for actor in self.objects:
+                self.enemies.append(actor)
+            self.objects.append(self.player)
+            self.run()
+
 
     def paint(self):
         self.canvas.delete(ALL)
@@ -191,7 +219,7 @@ class Game:
             if self.timer==1000000:
                 self.end()
                 return
-            if self.timer%100==1:
+            if self.timer%self.followThreshold==1:
                 for enemy in self.enemies:
                     enemy.makeFollow(self.player.x,self.player.y)
             self.eraseFood()
