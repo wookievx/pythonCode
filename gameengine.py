@@ -5,6 +5,9 @@ import movementengine
 import math3d as m3d
 from random import *
 
+"""
+Class responisble for movement of enemies
+"""
 class BasicActor(movementengine.rigidObj):
     def __init__(self,radius=5,startx=0,starty=0,startvx=0,startvy=0):
         movementengine.rigidObj.__init__(self)
@@ -32,7 +35,9 @@ class BasicActor(movementengine.rigidObj):
         self.velocityx=newVel[0]*self.speed
         self.velocityy=newVel[1]*self.speed
 
-
+"""
+Class responsible for movement of player
+"""
 class PlayerChar(BasicActor):
     def __init__(self,radius=5,startx=0,starty=0,startvx=0,startvy=0):
         BasicActor.__init__(self,radius,startx,starty,startvx,startvy)
@@ -58,9 +63,7 @@ class PlayerChar(BasicActor):
         self.velocityy=v[1]
 
     def setVelocity(self,x,y):
-        if self.x==x or self.y==y:
-            self.velocityx=0
-            self.velocityy=0
+        if self.x==x and self.y==y:
             return
 
         vector1=m3d.Vector(x-self.x,y-self.y,0)
@@ -77,7 +80,11 @@ class PlayerChar(BasicActor):
             self.velocityx=vec[0]/10
             self.velocityy=vec[1]/10
 
-
+"""
+main game class
+defines main frame,
+win/lose condition
+"""
 class Game:
     def __init__(self, iheight=300, iwidth=300, bgcolor="black"):
         """part of engine behind graphics
