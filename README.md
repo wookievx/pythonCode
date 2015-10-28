@@ -1,6 +1,14 @@
 # Zadanie 1
 Gra
 W celu uruchomienia gry należy posiadać pakiet tkinter standardowej bibliteki python dla wersji 3.4.3
+Należy zainstalować moduł math3d, do działania tego ostatniego potrzebny jest moduł numpy:
+Dla załączonego, bądź innego wirtualnego środowiska, czy też całego systemu należy wykonać komendy:
+$ pip3 instal numpy
+$ pip3 install math3d
+Może zaistnieć problem z instalacją biblioteki numpy, należy wtedy zainstalować pakiet developera języka python.
+Dla systemu Fedora 21, wystarczy:
+$ yum install python3-devel
+Dla innych systemów instalacja może być inna
 
 Opis gry:
 Twoim celem jest nakarmienie głodującego studenta agh, niestety atakują go dziwne czerwone owale (twórca gry nie wysilił się na nic bystrzejszego).
